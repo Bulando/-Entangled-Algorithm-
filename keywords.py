@@ -35,31 +35,54 @@ class Merge_synonyms(object):
         return ckeys_mainwords, single_mainwords
 
     def De_duplication(self, ckeys_mainwords):
-        dup = {}
-        new_ckeys_mainwords = {}
-        for key, main_words in ckeys_mainwords.items():
-            str = ''
+        keys = list(ckeys_mainwords.keys())      # 修改 2022-5-8 原有错误：①先入为主，比较的四种情况；②顺序叠加，集合关系不应考虑顺序
+        all_main_words = list(ckeys_mainwords.values())
+        del_index = []
+        for i, main_words in enumerate(all_main_words):
             score = 0
-            for word in main_words:
-                str+= word
-                score += self.fres[word][key]
-            judge = True                                 # 重要修改 2021-12-29
-            for dk in list(dup.keys()):
-                if str in dk and len(str) != len(dk):
-                    judge = False
-                    str = dk
-            if judge:
-                if str not in dup:
-                    new_ckeys_mainwords[key] = main_words
-                    dup[str] = [key, score]
-                else:
-                    d = dup[str]
-                    if score > float(d[1]):
-                        print("有冲突的是", key ,"和", d[0])
-                        new_ckeys_mainwords[key] = main_words
-                        new_ckeys_mainwords.pop(d[0])
-                        dup[str] = [key, score]
-        return new_ckeys_mainwords
+            for j, next_words in enumerate(all_main_words):
+                scoreN = 0
+                if i == j: continue
+                if main_words in next_words or main_words == next_words:
+                    for word in main_words:
+                        score += self.fres[word][keys[i]]
+                    for word in next_words:
+                        scoreN += self.fres[word][keys[j]]
+                    if score <= scoreN:
+                        print("有冲突的是", keys[i], "和", keys[j])
+                        del_index.append(i)
+                        break
+        del_keys = [keys[i] for i in del_index]
+        for k in del_keys:
+            del ckeys_mainwords[k]
+
+        # dup = {}
+        # new_ckeys_mainwords = {}
+        # for key, main_words in ckeys_mainwords.items():
+        #     str = ''
+        #     score = 0
+        #     for word in main_words:
+        #         str+= word
+        #         score += self.fres[word][key]
+        #     judge = True                                 # 重要修改 2021-12-29（只考虑了三种比较）
+        #     for dk in list(dup.keys()):
+        #         if str in dk and len(str) != len(dk):
+        #             judge = False
+        #             str = dk
+        #             print("1有冲突的是", key, "和", dup[dk][0])
+        #     if judge:
+        #         if str not in dup:
+        #             new_ckeys_mainwords[key] = main_words
+        #             dup[str] = [key, score]
+        #         else:
+        #             d = dup[str] if str in dup else 0
+        #             if score > float(d[1]):
+        #                 print("2有冲突的是", key, "和", d[0])
+        #                 new_ckeys_mainwords[key] = main_words
+        #                 new_ckeys_mainwords.pop(d[0])
+        #                 dup[str] = [key, score]
+        # return new_ckeys_mainwords
+        return ckeys_mainwords
 
     def Merge_synonyms_utils(self, new_ckeys_mainwords):
         mains = []
