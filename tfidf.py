@@ -105,7 +105,7 @@ class TFIDF(object):
                     # keys.append(featureList[k][0])
                     fres[self.entities[i]] = one_doc_fre
             else:
-                print("xxxxxxxxxxxxxxxxxxx")
+                # print("xxxxxxxxxxxxxxxxxxx")
                 print("文档", self.entities[i], "没有特征，其内容为：", self.document[i])
 
         return keywords, fres

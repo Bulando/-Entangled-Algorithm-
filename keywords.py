@@ -42,7 +42,8 @@ class Merge_synonyms(object):
             score = 0
             for j, next_words in enumerate(all_main_words):
                 scoreN = 0
-                if i == j: continue
+                if i in del_index: break
+                elif i == j or j in del_index: continue
                 if main_words in next_words or main_words == next_words:
                     for word in main_words:
                         score += self.fres[word][keys[i]]
@@ -51,7 +52,8 @@ class Merge_synonyms(object):
                     if score <= scoreN:
                         print("有冲突的是", keys[i], "和", keys[j])
                         del_index.append(i)
-                        break
+                    else:
+                        del_index.append(j)
         del_keys = [keys[i] for i in del_index]
         for k in del_keys:
             del ckeys_mainwords[k]
@@ -151,10 +153,12 @@ if __name__ == '__main__':
     path = os.path.join(dir_path, 'data', 'canopy聚类文档(0.8,0.86).txt')
     stopP = os.path.join(dir_path, 'data', '哈工大停用词表.txt')
     docs = readDict(path)
-
+    print("开始构建类簇关键词词频矩阵……")
     # 预处理
     document, entities = preprocessing(documents=docs, stopP=stopP)
-
+    print("构建完成")
+    print("未聚类前，有%d个类簇" % len(entities))
+    print("开始迭代执行相织算法")
     # 相织算法
     last_group = []
     ms = Merge_synonyms(dataset=document, entities=entities)
@@ -195,4 +199,5 @@ if __name__ == '__main__':
         merge = Merge_synonyms(dataset=document, entities=entities)
         group = merge.switch()
         print("第%d次聚类的簇数为%d" % (num, len(group)))
+    print("相织算法执行结束！")
 
