@@ -72,17 +72,17 @@ class Merge_synonyms(object):
         #             judge = False
         #             str = dk
         #             print("1有冲突的是", key, "和", dup[dk][0])
-        #     if judge:
-        #         if str not in dup:
-        #             new_ckeys_mainwords[key] = main_words
-        #             dup[str] = [key, score]
-        #         else:
-        #             d = dup[str] if str in dup else 0
-        #             if score > float(d[1]):
-        #                 print("2有冲突的是", key, "和", d[0])
+        #         if judge:
+        #             if str not in dup:
         #                 new_ckeys_mainwords[key] = main_words
-        #                 new_ckeys_mainwords.pop(d[0])
         #                 dup[str] = [key, score]
+        #             else:
+        #                 d = dup[str] if str in dup else 0
+        #                 if score > float(d[1]):
+        #                     print("2有冲突的是", key, "和", d[0])
+        #                     new_ckeys_mainwords[key] = main_words
+        #                     new_ckeys_mainwords.pop(d[0])
+        #                     dup[str] = [key, score]
         # return new_ckeys_mainwords
         return ckeys_mainwords
 
@@ -99,25 +99,23 @@ class Merge_synonyms(object):
         return compete_mainwords, mainwords_ckeys_1_n
 
     def Compete_keywords_merge_synonyms(self, compete_mainwords, mainwords_ckeys_1_n, new_ckeys_mainwords):
-        for key, main_list in new_ckeys_mainwords.items():
-            for mainw in main_list[:]:  # 遍历实体列表
-                if mainw in compete_mainwords:  # 如果实体对应多个关键词
-                    repeat_list = mainwords_ckeys_1_n[mainw]  # 从字典中提取出实体对应的多个关键词
-                    max_fre = 0
-                    scores = 0
-                    for si in [s for s in self.fres[mainw].values()]:
-                        scores += si
-                    for li in repeat_list:  # 遍历这个实体对应的多个关键词
-                        score = self.fres[mainw][li]/scores if li in self.fres[mainw] else 0
-                        # kws = self.keys_mainwords_nums[self.all_mainwords.index(mainw)]  # 从实体-关键词-词频表中获得该实体
-                        if score > max_fre:  # 如果该实体所在的关键词词频大于最大值
-                            max_fre = score  # 最大值设为该词频
-                            max_key = str(li)  # 最大关键词设为该关键词
-                    for key2, value in new_ckeys_mainwords.items():  # 开始断开边
-                        if max_key != key2 and mainw in value:
-                            wordsList = new_ckeys_mainwords[key2]
-                            wordsList.remove(mainw)
-                            new_ckeys_mainwords[key2] = wordsList
+        for mainw in compete_mainwords:
+            repeat_list = mainwords_ckeys_1_n[mainw]
+            max_fre = 0
+            scores = 0
+            max_key = ''
+            for si in [s for s in self.fres[mainw].values()]:
+                scores+=si
+            for li in repeat_list:
+                score = self.fres[mainw][li] / scores if li in self.fres[mainw] else 0
+                if score > max_fre:  # 如果该实体所在的关键词词频大于最大值
+                    max_fre = score  # 最大值设为该词频
+                    max_key = str(li)  # 最大关键词设为该关键词
+            for key2, value in new_ckeys_mainwords.items():  # 开始断开边
+                if max_key != key2 and mainw in value:
+                    wordsList = new_ckeys_mainwords[key2]
+                    wordsList.remove(mainw)
+                    new_ckeys_mainwords[key2] = wordsList
         return new_ckeys_mainwords
 
     def Merge_synonyms(self, new_ckeys_mainwords, single_mainwords):
